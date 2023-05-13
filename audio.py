@@ -80,9 +80,9 @@ for video_name in os.listdir(videos_path):
         X.append(value)
 
         if video_name.startswith("V"):
-            y.append("V")
+            y.append("v")
         elif video_name.startswith("NV"):
-            y.append("NV")
+            y.append("n")
 
 X = np.array(X)
 y = np.array(y)
@@ -91,18 +91,21 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 X_train, X_test = scale_features(X_train, X_test)
 X_train, X_test = select_features(X_train, y_train, X_test, 7, fn, False)
 
-# Train the SVM classifier on the training set
-svm = SVC(C=1.0, kernel='rbf', gamma='scale')
+# NOTE: use default parameters (used for very small datasets)
+"""
+svm = SVC(C=1.0, kernel='rbf', gamma='scale', probability=True)
+"""
 
 # NOTE: alternatively you can find the best parameters that fit the training dataset
-"""
-svm = SVC()
+#"""
+svm = SVC(probability=True)
 svm.set_params(**grid_search(svm, X_train, y_train))  # sets best parameters
-"""
+#"""
 
 svm.fit(X_train, y_train)
 
-# Evaluate the classifier on the testing set
 y_pred = svm.predict(X_test)
+proba = svm.predict_proba(X_test)
+
 accuracy = accuracy_score(y_test, y_pred)
-print(f"Predicted labels: {y_pred}\nTrue labels: {y_test}\nAccuracy: {accuracy:.2f}")
+print(f"Predicted labels: {y_pred}\nTrue labels: {y_test}\nCertainty: {proba}\nAccuracy: {accuracy:.2f}")
