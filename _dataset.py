@@ -2,6 +2,7 @@ import os
 import librosa
 import numpy as np
 from _utils import Utils
+import moviepy.editor as mp
 from pyAudioAnalysis import ShortTermFeatures as aF
 
 class Dataset:
@@ -14,12 +15,15 @@ class Dataset:
         self.sample_rate = sample_rate
         self.metric = metric
         self.fn = None
+        self.video = None
         self.video_name = None
         self.X = []
         self.y = []
 
     def prepare_data(self):
         for self.video_name in os.listdir(self.videos_path):
+            video_path = os.path.join(self.videos_path, self.video_name)
+            self.video = mp.VideoFileClip(video_path)
             self.y.append("v" if self.video_name.startswith("V") else "n")
             self.extract_audio_features()
         self.X = np.array(self.X)
@@ -28,6 +32,8 @@ class Dataset:
 
     def extract_audio_features(self):
         audio_path = os.path.join(self.audios_path, os.path.splitext(self.video_name)[0] + ".wav")
+        audio = self.video.audio
+        audio.write_audiofile(audio_path)
         s, fs = librosa.load(audio_path, sr=self.sample_rate) 
         [f, self.fn] = aF.feature_extraction(s, fs, int(fs * self.window), int(fs * self.step))
         self.X.append(Utils.represent(f, self.metric))
