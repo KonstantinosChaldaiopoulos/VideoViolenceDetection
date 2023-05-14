@@ -19,4 +19,4 @@ class Utils:
         for i, element in enumerate(tuple):
             data[keys[i]] = list(element)
         df = pd.DataFrame(data)
-        display(df)
+        display(df)   

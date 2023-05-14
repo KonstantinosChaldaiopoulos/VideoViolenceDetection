@@ -1,4 +1,5 @@
 import random
+import whisper
 from _model import SVMClassifier
 from _dataset import Dataset
 from _utils import Utils
@@ -12,7 +13,7 @@ random_state = random.randint(1, 100)
 path = "/content/drive/MyDrive/DATASETS/tester"
 
 ################################################################################################################
-ds = Dataset(path, window=0.02, step=0.01, sample_rate=16000, metric="std")
+ds = Dataset(path, window=0.02, step=0.01, sample_rate=16000, metric="std", model=whisper.load_model("tiny"))
 
 audio_data, text_data = ds.prepare_data()
 
