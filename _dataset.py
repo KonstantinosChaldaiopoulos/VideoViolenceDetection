@@ -3,21 +3,28 @@ import librosa
 import numpy as np
 from _utils import Utils
 import moviepy.editor as mp
+from transformers import pipeline
 from pyAudioAnalysis import ShortTermFeatures as aF
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 class Dataset:
 
-    def __init__(self, dataset_path, window=0.02, step=0.01, sample_rate=16000, metric="std"):
+    def __init__(self, dataset_path, window=0.02, step=0.01, sample_rate=16000, n=2, metric="std"):
         self.videos_path = os.path.join(dataset_path, "videos")
         self.audios_path = os.path.join(dataset_path, "audios")
+        self.texts_path = os.path.join(dataset_path, "texts")
         self.window = window
         self.step = step
         self.sample_rate = sample_rate
+        self.n = n
         self.metric = metric
         self.fn = None
+        self.vectorizer = TfidfVectorizer(ngram_range=(n,n), lowercase=True)
+        self.asr = pipeline("automatic-speech-recognition", model="facebook/wav2vec2-base-960h")
         self.video = None
         self.video_name = None
-        self.X = []
+        self.Xa = []
+        self.Xt = []
         self.y = []
 
     def prepare_data(self):
@@ -26,9 +33,11 @@ class Dataset:
             self.video = mp.VideoFileClip(video_path)
             self.y.append("v" if self.video_name.startswith("V") else "n")
             self.extract_audio_features()
-        self.X = np.array(self.X)
+            self.extract_text_features()
+        self.Xa = np.array(self.Xa)
+        self.Xt = self.vectorizer.fit_transform(self.Xt).toarray()
         self.y = np.array(self.y)
-        return (self.X, self.y)
+        return (self.Xa, self.y), (self.Xt, self.y)
 
     def extract_audio_features(self):
         audio_path = os.path.join(self.audios_path, os.path.splitext(self.video_name)[0] + ".wav")
@@ -36,7 +45,15 @@ class Dataset:
         audio.write_audiofile(audio_path)
         s, fs = librosa.load(audio_path, sr=self.sample_rate) 
         [f, self.fn] = aF.feature_extraction(s, fs, int(fs * self.window), int(fs * self.step))
-        self.X.append(Utils.represent(f, self.metric))
-    
+        self.Xa.append(Utils.represent(f, self.metric))
+
+    def extract_text_features(self):
+        audio_path = os.path.join(self.audios_path, os.path.splitext(self.video_name)[0] + ".wav")
+        text_path = os.path.join(self.texts_path, os.path.splitext(self.video_name)[0] + ".txt")
+        text = self.asr(librosa.load(audio_path, sr=None)[0])["text"]
+        with open(text_path, "w") as f:
+            f.write(text)
+        self.Xt.append(text)
+
     def get_feature_names(self):
-        return self.fn
+            return self.fn
