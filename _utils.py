@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+from IPython.display import display
 
 class Utils:
 
@@ -11,3 +13,10 @@ class Utils:
             return np.median(array, axis=1)
         elif metric == "range":
             return np.ptp(array, axis=1)
+        
+    def visualize(tuple, keys):
+        data = {}
+        for i, element in enumerate(tuple):
+            data[keys[i]] = list(element)
+        df = pd.DataFrame(data)
+        display(df)

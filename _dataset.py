@@ -1,26 +1,28 @@
 import os
+import whisper
 import librosa
 import numpy as np
 from _utils import Utils
 import moviepy.editor as mp
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer, TFAutoModel
 from pyAudioAnalysis import ShortTermFeatures as aF
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 class Dataset:
 
-    def __init__(self, dataset_path, window=0.02, step=0.01, sample_rate=16000, n=2, metric="std"):
+    def __init__(self, dataset_path, window=0.02, step=0.01, sample_rate=16000, metric="std", model="facebook/wav2vec2-base-960h"):
         self.videos_path = os.path.join(dataset_path, "videos")
         self.audios_path = os.path.join(dataset_path, "audios")
         self.texts_path = os.path.join(dataset_path, "texts")
         self.window = window
         self.step = step
         self.sample_rate = sample_rate
-        self.n = n
         self.metric = metric
+        self.model = model
         self.fn = None
-        self.vectorizer = TfidfVectorizer(ngram_range=(n,n), lowercase=True)
-        self.asr = pipeline("automatic-speech-recognition", model="facebook/wav2vec2-base-960h")
+        self.asr = pipeline("automatic-speech-recognition", model=model)
+        # self.asr = pipeline("automatic-speech-recognition", model="mozilla/deepspeech-0.9.3")
+        self.tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+        self.model = TFAutoModel.from_pretrained('bert-base-uncased')
         self.video = None
         self.video_name = None
         self.Xa = []
@@ -35,7 +37,7 @@ class Dataset:
             self.extract_audio_features()
             self.extract_text_features()
         self.Xa = np.array(self.Xa)
-        self.Xt = self.vectorizer.fit_transform(self.Xt).toarray()
+        self.Xt = self.get_bert_embeddings()
         self.y = np.array(self.y)
         return (self.Xa, self.y), (self.Xt, self.y)
 
@@ -54,6 +56,12 @@ class Dataset:
         with open(text_path, "w") as f:
             f.write(text)
         self.Xt.append(text)
+
+    def get_bert_embeddings(self):
+        inputs = self.tokenizer(self.Xt, return_tensors='tf', padding=True, truncation=True, max_length=None)
+        outputs = self.model(inputs)
+        embeddings = outputs.last_hidden_state[:, 0, :].numpy() # [CLS] token at id=0, represents the entire input sequence (captures its overall meaning)
+        return embeddings
 
     def get_feature_names(self):
             return self.fn

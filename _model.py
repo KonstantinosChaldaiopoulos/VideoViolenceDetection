@@ -7,10 +7,11 @@ from sklearn.model_selection import GridSearchCV
 
 class SVMClassifier:
 
-    def __init__(self, X, y, fn, test_size=0.2, num_features=7):
+    def __init__(self, X, y, fn, random_state, test_size=0.2, num_features=7):
         self.X = X
         self.y = y
         self.fn = fn
+        self.random_state = random_state
         self.test_size = test_size
         self.num_features = num_features
         self.X_train = None
@@ -24,7 +25,7 @@ class SVMClassifier:
         self.best_parameters = None
         
     def preprocess_data(self):
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=self.test_size, random_state=None, shuffle=True)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=self.test_size, random_state=self.random_state)
         self.scale_features()
         self.select_features()
         
@@ -37,7 +38,8 @@ class SVMClassifier:
         selector = SelectKBest(f_classif, k=self.num_features)
         self.X_train = selector.fit_transform(self.X_train, self.y_train)
         self.X_test = selector.transform(self.X_test)
-        self.fn = [self.fn[i] for i, selected in enumerate(selector.get_support()) if selected]
+        if self.fn is not None: # None-case: Text Classification (BERT embeddings don't have feature names)
+            self.fn = [self.fn[i] for i, selected in enumerate(selector.get_support()) if selected]
     
     def set_parameters(self):
         param_grid = {'kernel': ['linear', 'rbf', 'poly'], 'C': [0.1, 0.5, 1, 2, 5, 10, 20], 'gamma': ['scale', 'auto']}
