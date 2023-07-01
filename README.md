@@ -27,12 +27,18 @@ To run the code, please follow these steps:
 ## Prerequisites
 The following python packages are required for the code to run:
 * Python 3: https://www.python.org/downloads/
-* Scikit-learn: ```pip install -U scikit-learn```
-* PrettyTable: ```pip install prettytable```
+* Scikit-learn: `pip install -U scikit-learn`
+* PyTorch: `pip install torch`
+* Transformers: `pip install transformers`
+* pyAudioAnalysis: `pip install pyAudioAnalysis`
+* tqdm: `pip install tqdm`
+* NumPy: `pip install numpy`
+* Pillow: `pip install pillow`
+* Librosa: `pip install librosa`
 
 **Alternatively:** you can download [requirements.txt](https://github.com/KonstantinosChaldaiopoulos/VideoViolenceDetection/blob/main/requirements.txt) and run ```pip install -r requirements.txt```, to automatically install all the packages needed to reproduce my project on your own machine.
 
-**```>```** For this project, we used ..... You can download the dataset directly from this link: ....  Please note that in order to run the code, you should have .... in your local folder.
+**```>```** For this project, we used a custom movie-dataset. You can download the dataset directly from this [link](https://drive.google.com/drive/folders/1K6P0tfItrAPVkCyPw-8al3Br2le1B7JH?usp=sharing).
 
 ## Authors
 Konstantinos Chaldaiopoulos & Natalia Koliou
