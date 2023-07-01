@@ -1,27 +1,35 @@
-import random
-import whisper
-from _model import SVMClassifier
-from _dataset import Dataset
-from _utils import Utils
 from google.colab import drive
+import warnings
+import numpy as np
+from _model import *
+from _dataset import *
+from _utils import *
 
 drive.mount('/content/drive')
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+np.set_printoptions(suppress=True)
+warnings.filterwarnings("ignore", category=UserWarning)
 
-random_state = random.randint(1, 100)
+path = "/content/drive/MyDrive/DATASETS/movie-dataset"
 
-#path = "/content/drive/MyDrive/DATASETS/movie-dataset"
-path = "/content/drive/MyDrive/DATASETS/tester"
+ds = MovieDataset(device, path, sample_rate=16000, metric="std")
+audio_data, image_data, text_data = ds.prepare_data()
 
-################################################################################################################
-ds = Dataset(path, window=0.02, step=0.01, sample_rate=16000, metric="std", model=whisper.load_model("tiny"))
+aSVM = TRClassifier(*audio_data, ds.get_feature_names(), num_features=7, classifier="svm", scaler=None)
+audio_val_acc, audio_test_acc = aSVM.run()
 
-audio_data, text_data = ds.prepare_data()
+tSVM = TRClassifier(*text_data, None, num_features=10, classifier="svm", scaler=None)
+text_val_acc, text_test_acc = tSVM.run()
 
-aSVM = SVMClassifier(*audio_data, ds.get_feature_names(), random_state, test_size=0.2, num_features=7)
-ya_pred, y_test, audio_certainty, audio_accuracy = aSVM.run()
+iNN = NNClassifier(*image_data, epochs=20, lr=0.00001, wd=0.05, device=device)
+image_val_acc, image_test_acc = iNN.run()
 
-tSVM = SVMClassifier(*text_data, None, random_state, test_size=0.2, num_features=7)
-yt_pred, y_test, text_certainty, text_accuracy = tSVM.run()
+mds = MultiMovieDataset(audio_data, image_data, text_data, exists=False)
+multi_data = mds.prepare_multidata()
 
-results = ((ya_pred, yt_pred), (y_test, y_test), (audio_accuracy, text_accuracy), (audio_certainty, text_certainty))
-Utils.visualize(results, ['Predicted Labels', 'True Labels', 'Accuracy', 'Certainty'])
+mdMNN = MNNClassifier(*multi_data, epochs=25, lr=0.00001, wd=0.0, device=device)
+multi_test_acc = mdMNN.run()
+
+late_fusion_acc = late_fuse((audio_val_acc, text_val_acc, image_val_acc), (audio_test_acc, text_test_acc, image_test_acc))
+print("Late Fusion Accuracy: {:.2f} %".format(late_fusion_acc))
+print("Early Fusion Accuracy: {:.2f} %".format(multi_test_acc))
