@@ -15,6 +15,15 @@ We implement two different multimodal fusion approaches: Early Fusion and Late F
 * **Evaluate Results:**
 After training the classifiers using both the Early Fusion and Late Fusion approach, the code evaluates the performance of the multimodal classification system. It calculates and displays the accuracy scores for both approaches. This evaluation helps demonstrate the effectiveness of multimodal fusion in improving classification accuracy and leveraging complementary information from different data sources.
 
+## Running the Code
+To run the code, please follow these steps:
+1. Download [violence-detection.ipynb](https://github.com/KonstantinosChaldaiopoulos/VideoViolenceDetection/blob/main/violence-detection.ipynb), along with [_utils.py](https://github.com/KonstantinosChaldaiopoulos/VideoViolenceDetection/blob/main/_utils.py), [_model.py](https://github.com/KonstantinosChaldaiopoulos/VideoViolenceDetection/blob/main/_model.py), and [_dataset.py](https://github.com/KonstantinosChaldaiopoulos/VideoViolenceDetection/blob/main/_dataset.py).
+2. Download the [movie-dataset](https://drive.google.com/drive/folders/1K6P0tfItrAPVkCyPw-8al3Br2le1B7JH?usp=sharing) and store it in a folder named DATASETS inside your Google Drive.
+3. In your Google Drive, create an empty folder named `mdml-run-env` and place _utils.py, _model.py, and _dataset.py inside it.
+4. Open Google Colab and upload the violence-detection.ipynb notebook.
+5. Make sure the notebook has access to the necessary libraries and runtime environment.
+6. Run the notebook cell by cell to execute the code.
+
 ## Prerequisites
 The following python packages are required for the code to run:
 * Python 3: https://www.python.org/downloads/
