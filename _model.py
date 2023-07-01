@@ -8,8 +8,8 @@ from torchvision.models import alexnet, squeezenet1_0
 from sklearn.metrics import precision_recall_fscore_support
 from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
-import torch.nn.functional as F
 from torch.optim import RMSprop
+import torch.nn.functional as F
 from _utils import *
 
 class TRClassifier:
@@ -188,7 +188,7 @@ class NNClassifier:
             self.validate(epoch)
         plot_metrics(self.train_losses, self.val_losses, self.train_accuracies, self.val_accuracies)
         self.test()
-        return self.val_accuracy, self.test_accuracy
+        return self.bva, self.test_accuracy
     
 
 class MNNClassifier:
