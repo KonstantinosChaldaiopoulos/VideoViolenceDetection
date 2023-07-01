@@ -136,7 +136,7 @@ class NNClassifier:
     
     def validate(self, epoch):
         self.model.eval()
-        val_steps, val_correct, val_total, val_pred, val_true = 0, 0, 0, [], []
+        val_loss, val_steps, val_correct, val_total, val_pred, val_true = 0, 0, 0, 0, [], []
         with torch.no_grad():
             for i, data in enumerate(tqdm(self.val_loader, desc="Validating")):
                 inputs, labels = data
