@@ -115,7 +115,7 @@ class NNClassifier:
 
     def train(self, epoch):
         self.model.train()
-        train_loss, train_steps, train_total = 0, 0, 0
+        train_loss, train_steps, train_correct, train_total = 0, 0, 0, 0
         pbar = tqdm(self.train_loader, desc="Training", total=len(self.train_loader))
         for i, data in enumerate(pbar):
             inputs, labels = data
