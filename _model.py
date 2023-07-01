@@ -8,8 +8,8 @@ from torchvision.models import alexnet, squeezenet1_0
 from sklearn.metrics import precision_recall_fscore_support
 from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
-from torch.optim import RMSprop
 import torch.nn.functional as F
+from torch.optim import RMSprop
 from _utils import *
 
 class TRClassifier:
