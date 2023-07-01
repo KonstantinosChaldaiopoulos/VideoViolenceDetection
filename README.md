@@ -1,4 +1,4 @@
-# Multimodal Violence Detection in Videos
+# Violence Detection in Videos: A Multimodal Approach
 
 With the rapid growth of video content, the efficient detection of violence in videos has become increasingly crucial for ensuring effective regulation. In this project, our main focus was on developing a multimodal classification system capable of classifying videos into violent and nonviolent. To achieve this, we used three modalities: text, audio, and image data. We explored both early fusion, where all modalities are combined and processed through one neural network, and late fusion, where individual models for each modality produce outputs that are combined to make a final decision.
 
