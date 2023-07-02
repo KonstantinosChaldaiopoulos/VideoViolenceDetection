@@ -87,7 +87,7 @@ class TRClassifier:
         self.train()
         self.validate()
         self.test()
-        return self.val_accuracy, self.test_accuracy
+        return self.val_accuracy, self.test_confidence, self.y_test
 
 
 class NNClassifier:
@@ -112,6 +112,7 @@ class NNClassifier:
         self.val_losses = []
         self.train_accuracies = []
         self.val_accuracies = []
+        self.outputs = []
 
     def train(self, epoch):
         self.model.train()
@@ -177,6 +178,7 @@ class NNClassifier:
                 test_loss += self.criterion(outputs, labels).item()
                 self.y_pred.extend(predicted.cpu().numpy())
                 self.y_test.extend(labels.cpu().numpy())
+                self.outputs.extend(outputs)
         self.test_accuracy = test_correct / test_total
         test_precision, test_recall, test_f1, _ = precision_recall_fscore_support(self.y_test, self.y_pred, average='weighted')
         print('Test Accuracy: {:.2f} %, Test Precision: {:.2f} %, Test Recall: {:.2f} %, Test F1-score: {:.2f} %'
@@ -188,7 +190,7 @@ class NNClassifier:
             self.validate(epoch)
         plot_metrics(self.train_losses, self.val_losses, self.train_accuracies, self.val_accuracies)
         self.test()
-        return self.bva, self.test_accuracy
+        return self.bva, self.outputs, self.y_test
     
 
 class MNNClassifier:

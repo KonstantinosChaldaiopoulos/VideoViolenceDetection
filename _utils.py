@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -47,9 +48,24 @@ def select_scaler(scaler_name):
     else: # default scaler: scaler_name = None
         return None
     
-def late_fuse(val_accuracies, test_accuracies):
+def to_numpy(x):
+    if isinstance(x, torch.Tensor):
+        return x.cpu().numpy()
+    elif isinstance(x, list):
+        return [to_numpy(i) for i in x]
+    elif isinstance(x, tuple):
+        return tuple(to_numpy(i) for i in x)
+    elif isinstance(x, dict):
+        return {k: to_numpy(v) for k, v in x.items()}
+    else:
+        return x
+
+def late_fuse(val_accuracies, test_confidences, labels):
     weights = tuple(val / sum(val_accuracies) for val in val_accuracies)
-    late_fusion_accuracy = sum(w * acc for w, acc in zip(weights, test_accuracies))
+    test_confidences = to_numpy(test_confidences)
+    fused_confidence = sum(w * np.array(conf) for w, conf in zip(weights, test_confidences))
+    prediction = fused_confidence.argmax(axis=1)
+    late_fusion_accuracy = accuracy_score(labels, prediction)
     return late_fusion_accuracy
 
 def to_npdict(dict):
